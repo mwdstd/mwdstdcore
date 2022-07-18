@@ -1,0 +1,8 @@
+{ "structure":
+    [{"type": "mwd", "od": 0.1308, "id": 0.034, "weight": 30000, "length": 300, "material": "nmsteel", "description": "", "sn": ""}],
+  "blades":
+    [],
+  "bend_angle": 0.0,
+  "bend_to_bit": 0.0,
+  "dni_to_bit": 7.85}
+
