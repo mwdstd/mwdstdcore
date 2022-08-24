@@ -16,25 +16,23 @@ def iat(dni_xyz: ndarray, dec: ndarray = np.zeros(0), grid: ndarray = np.zeros(0
     if dec.shape[0] != srv_num or grid.shape[0] != srv_num or sag.shape[0] != srv_num:
         raise Exception('Method iat(): wrong dimensions of input arrays: dni_xyz, dec, grid, sag')
 
-    gx = dni_xyz[:, 2]
+    gx = dni_xyz[:, 0]
     gy = dni_xyz[:, 1]
-    gz = dni_xyz[:, 0]
-    bx = dni_xyz[:, 5]
+    gz = dni_xyz[:, 2]
+    bx = dni_xyz[:, 3]
     by = dni_xyz[:, 4]
-    bz = dni_xyz[:, 3]
-
-    [g, b, d] = gbd(dni_xyz)
+    bz = dni_xyz[:, 5]
 
     inc = arctan2(sqrt(gy ** 2 + gz ** 2), gx) - sag
 
-    a1 = bx / b - gx / g * sin(d)
-    a2 = (gy * bz - gz * by) / g / b
-    az = arctan2(a2, a1) + (dec - grid)
+    ew = (gx * by - gy * bx) * np.sqrt(gx ** 2 + gy ** 2 + gz ** 2)
+    ns = bz * (gx ** 2 + gy ** 2) - gz * (gx * bx + gy * by)
+    az = arctan2(ew, ns) + (dec - grid)
     az = az + (az < 0.) * 2 * pi * np.ones(srv_num)
     az[inc == 0.] = 0.
 
     tf = arctan2(gz, -gy)
-    return [inc, az, tf]
+    return inc, az, tf
 
 
 def iat2xyz(inc: ndarray, az: ndarray, tf: ndarray, g: ndarray, b: ndarray, d: ndarray, dec: ndarray, grid: ndarray):
@@ -55,7 +53,7 @@ def gbd(dni_xyz: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
     g = sqrt(dni_xyz[:, 0] ** 2 + dni_xyz[:, 1] ** 2 + dni_xyz[:, 2] ** 2)
     b = sqrt(dni_xyz[:, 3] ** 2 + dni_xyz[:, 4] ** 2 + dni_xyz[:, 5] ** 2)
     d = arcsin((dni_xyz[:, 0] * dni_xyz[:, 3] + dni_xyz[:, 1] * dni_xyz[:, 4] + dni_xyz[:, 2] * dni_xyz[:, 5]) / g / b)
-    return [g, b, d]
+    return g, b, d
 
 
 def dgbd(dni_xyz: ndarray, ref: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
@@ -63,7 +61,7 @@ def dgbd(dni_xyz: ndarray, ref: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
     dg = ref[:, 0] - g
     db = ref[:, 1] - b
     dd = ref[:, 2] - d
-    return [dg, db, dd]
+    return dg, db, dd
 
 
 def dni_correct(dni_xyz: ndarray, dni_cor: ndarray, faxis: int = -1, failed_axis: ndarray = np.zeros(0),
