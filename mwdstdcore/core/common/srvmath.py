@@ -23,7 +23,7 @@ def iat(dni_xyz: ndarray, dec: ndarray = np.zeros(0), grid: ndarray = np.zeros(0
     by = dni_xyz[:, 4]
     bz = dni_xyz[:, 5]
 
-    inc = arctan2(sqrt(gy ** 2 + gz ** 2), gx) - sag
+    inc = arctan2(sqrt(gx ** 2 + gy ** 2), gz) - sag
 
     ew = (gx * by - gy * bx) * np.sqrt(gx ** 2 + gy ** 2 + gz ** 2)
     ns = bz * (gx ** 2 + gy ** 2) - gz * (gx * bx + gy * by)
@@ -31,8 +31,8 @@ def iat(dni_xyz: ndarray, dec: ndarray = np.zeros(0), grid: ndarray = np.zeros(0
     az = az + (az < 0.) * 2 * pi * np.ones(srv_num)
     az[inc == 0.] = 0.
 
-    tf = arctan2(gz, -gy)
-    return inc, az, tf
+    tf = arctan2(-gx, -gy)
+    return [inc, az, tf]
 
 
 def iat2xyz(inc: ndarray, az: ndarray, tf: ndarray, g: ndarray, b: ndarray, d: ndarray, dec: ndarray, grid: ndarray):
@@ -49,19 +49,19 @@ def iat2xyz(inc: ndarray, az: ndarray, tf: ndarray, g: ndarray, b: ndarray, d: n
     return xyz
 
 
-def gbd(dni_xyz: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
+def gbd(dni_xyz: ndarray) -> [ndarray, ndarray, ndarray]:
     g = sqrt(dni_xyz[:, 0] ** 2 + dni_xyz[:, 1] ** 2 + dni_xyz[:, 2] ** 2)
     b = sqrt(dni_xyz[:, 3] ** 2 + dni_xyz[:, 4] ** 2 + dni_xyz[:, 5] ** 2)
     d = arcsin((dni_xyz[:, 0] * dni_xyz[:, 3] + dni_xyz[:, 1] * dni_xyz[:, 4] + dni_xyz[:, 2] * dni_xyz[:, 5]) / g / b)
-    return g, b, d
+    return [g, b, d]
 
 
-def dgbd(dni_xyz: ndarray, ref: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
+def dgbd(dni_xyz: ndarray, ref: ndarray) -> [ndarray, ndarray, ndarray]:
     [g, b, d] = gbd(dni_xyz)
     dg = ref[:, 0] - g
     db = ref[:, 1] - b
     dd = ref[:, 2] - d
-    return dg, db, dd
+    return [dg, db, dd]
 
 
 def dni_correct(dni_xyz: ndarray, dni_cor: ndarray, faxis: int = -1, failed_axis: ndarray = np.zeros(0),

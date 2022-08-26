@@ -1,5 +1,6 @@
 from typing import List, Optional
 from mwdstdcore.datamodel import Correction
+from mwdstdcore.datamodel.calc.station import bound_az
 from .models import Run3
 from ..logs import DebugTimer
 from mwdstdcore.steer.cinc2traj import cinc2traj
@@ -29,9 +30,8 @@ def hdtraj(runs: List[Run3], corrections: List[Optional[Correction]], optimize_h
                     md_cont_inc = [ci.md for ci in run.ci]
                     md_stations = [stn.md for stn in traj]
                     corr.stations_hd = opt4hd(md_stations, md_cont_inc, traj_hd) if optimize_hd else traj_hd
+                    for s in corr.stations_hd:
+                        s.az = bound_az(s.az)
             elif run.slidesheet is not None and len(run.slidesheet) > 0:
                 pass
-                # with DebugTimer(f"SSHD{ri}: {{:0.2f}}"):
-                #     traj_hd, _, _, _ = int_cor(run.slidesheet, traj, run.bha)
-                #     corr.stations_hd = traj_hd
 
