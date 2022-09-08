@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mwdstdcore"
-version = "0.5.3"
+version = "0.5.4"
 license = "AGPL-3.0-or-later"
 description = "Core project for basic measurement-while-drilling corrections"
 authors = ["MWD STD Inc. <info@mwdstd.com>"]
@@ -12,7 +12,6 @@ Flask = "^2.1.2"
 jsons = "^1.6.3"
 attrs = "^21.4.0"
 numpy = "^1.23.0"
-scipy = "^1.8.1"
 
 gunicorn = { version = "^19.9.0", optional = true }
 
