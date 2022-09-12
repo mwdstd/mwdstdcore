@@ -1,13 +1,14 @@
-import importlib
+from importlib import metadata
 from .core import api
 from ..utils import json_call
 
 
 self_package_name = 'mwdstdcore'
+
 try:
-    self_version = importlib.metadata.version(self_package_name)
-    self_description = importlib.metadata.metadata(self_package_name)['Summary']
-except:
+    self_version = metadata.version(self_package_name)
+    self_description = metadata.metadata(self_package_name)['Summary']
+except metadata.PackageNotFoundError:
     import tomlkit
     with open('pyproject.toml') as pyproject:
         file_contents = pyproject.read()
