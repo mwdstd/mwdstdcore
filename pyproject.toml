@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mwdstdcore"
-version = "0.5.4"
+version = "0.5.5"
 license = "AGPL-3.0-or-later"
 description = "Core project for basic measurement-while-drilling corrections"
 authors = ["MWD STD Inc. <info@mwdstd.com>"]
@@ -20,6 +20,9 @@ matplotlib = "^3.5.2"
 
 [tool.poetry.extras]
 gunicorn = ["gunicorn"]
+
+[tool.poetry.group.dev.dependencies]
+tomlkit = "^0.11.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

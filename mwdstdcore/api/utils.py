@@ -1,16 +1,21 @@
 from flask import jsonify, request
 import jsons
 import traceback
+import inspect
 from .apierror import APIError, RequestIsNotJSON
 
 
 def json_call(func):
     def wrapper():
         try:
-            if not request.json:
-                raise RequestIsNotJSON
-            jsn = request.json
-            res = func(jsn)
+            sig = inspect.signature(func)
+            if len(sig.parameters) > 0:
+                if not request.is_json:
+                    raise RequestIsNotJSON
+                jsn = request.json
+                res = func(jsn)
+            else:
+                res = func()
             return jsons.dumps(res, strip_properties=True, strip_nulls=True, strip_privates=True, strip_class_variables=True), 200
         except APIError as e:
             traceback.print_exc()
