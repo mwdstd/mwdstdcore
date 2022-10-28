@@ -23,6 +23,12 @@ gunicorn = ["gunicorn"]
 
 [tool.poetry.group.dev.dependencies]
 tomlkit = "^0.11.4"
+pytest = "^7.1.3"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
