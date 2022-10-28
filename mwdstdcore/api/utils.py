@@ -16,7 +16,7 @@ def json_call(func):
                 res = func(jsn)
             else:
                 res = func()
-            return jsons.dumps(res, strip_properties=True, strip_nulls=True, strip_privates=True, strip_class_variables=True), 200
+            return jsons.dumps(res, strip_properties=True, strip_nulls=True, strip_privates=True, strip_class_variables=True), 200, {'Content-Type': 'application/json'}
         except APIError as e:
             traceback.print_exc()
             return jsonify({'Error': e.message}), 400
