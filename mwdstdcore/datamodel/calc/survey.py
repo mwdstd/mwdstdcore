@@ -10,7 +10,7 @@ def calc_survey(s: FullStation, dec: float = 0., grid: float = 0., sag=0.) -> Su
     sina, cosa = sin(az), cos(az)
     sintf, costf = sin(s.tf), cos(s.tf)
     bcosd = s.tb*cos(s.dip)
-    bsind = s.tb*cos(s.dip)
+    bsind = s.tb*sin(s.dip)
     return Survey(
         md = s.md,
         gx = -s.tg*sini*sintf,
