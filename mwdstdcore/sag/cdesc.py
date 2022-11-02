@@ -1,7 +1,7 @@
 from math import sin, sqrt
 
 
-def coord_descent(xs, e, q, od, xl, xu, dz, bi, ba, do, wob, eps):
+def coord_descent(xs, e, q, od, xl, xu, dz, bi, ba, eps):
     g = 9.81
     sdx = 1.e0
     mi = 3000000
@@ -23,44 +23,41 @@ def coord_descent(xs, e, q, od, xl, xu, dz, bi, ba, do, wob, eps):
         for i in range(0, eln):
             if i == 0:
                 d0 = 0.
-                d1 = 0. - do[i]
-                d2 = (x[i + 2] + x[i] - 2 * x[i + 1]) / dz ** 2 + do[i + 1]
+                d1 = 0.
+                d2 = (x[i + 2] + x[i] - 2 * x[i + 1]) / dz ** 2
                 e0 = 0.
                 e1 = e[i]
                 e2 = e[i + 1]
             elif i == 1:
-                d0 = 0. - do[i - 1]
-                d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2 + do[i]
-                d2 = (x[i + 2] + x[i] - 2 * x[i + 1]) / dz ** 2 + do[i + 1]
+                d0 = 0.
+                d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2
+                d2 = (x[i + 2] + x[i] - 2 * x[i + 1]) / dz ** 2
                 e0 = e[i - 1]
                 e1 = e[i]
                 e2 = e[i + 1]
             elif i == eln - 2:
-                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2 + do[i - 1]
-                d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2 + do[i]
-                d2 = 0. - do[i + 1]
+                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2
+                d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2
+                d2 = 0.
                 e0 = e[i - 1]
                 e1 = e[i]
                 e2 = e[i + 1]
             elif i == eln - 1:
-                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2 + do[i - 1]
-                d1 = 0. - do[i]
+                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2
+                d1 = 0.
                 d2 = 0.
                 e0 = e[i - 1]
                 e1 = e[i]
                 e2 = 0.
             else:
-                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2 - (db if i == bi + 1 else 0.) + \
-                       do[i - 1]
-                d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2 - (db if i == bi else 0.) + do[i]
-                d2 = (x[i + 2] + x[i] - 2 * x[i + 1]) / dz ** 2 - (db if i == bi - 1 else 0.) + \
-                       do[i + 1]
+                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2 - (db if i == bi + 1 else 0.)
+                d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2 - (db if i == bi else 0.)
+                d2 = (x[i + 2] + x[i] - 2 * x[i + 1]) / dz ** 2 - (db if i == bi - 1 else 0.)
                 e0 = e[i - 1]
                 e1 = e[i]
                 e2 = e[i + 1]
 
-            dx = dz ** 2 * ((2 * e1 * d1 - e2 * d2 - e0 * d0) - (q[i] * g + wob * d1) * dz ** 2) / \
-                 (e0 + 4 * e1 + e2 - 2 * wob * dz ** 2)
+            dx = dz ** 2 * ((2 * e1 * d1 - e2 * d2 - e0 * d0) - q[i] * g * dz ** 2) / (e0 + 4 * e1 + e2)
 
             dx = t[i] - x[i] if (x[i] + dx > t[i]) else dx
             dx = b[i] - x[i] if (x[i] + dx < b[i]) else dx

@@ -77,5 +77,5 @@ def run_sagcor(station: Station, survey_gtf: float, bha: BHA, mud_weight:float, 
     # extrapolate trajectory to bit
     if traj[-1].md < bit_depth and len(traj) > 1:
         traj.append(extrapolate_station(bit_depth, traj[-1], traj[-2]))
-    res = sagcor(bha, bit_depth, traj, survey_gtf + bha.tf_correction, mud_weight, 0.)
+    res = sagcor(bha, bit_depth, traj, survey_gtf + bha.tf_correction, mud_weight)
     return res.sag, res.valid

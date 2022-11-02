@@ -14,7 +14,7 @@ def test_rss(bha: BHA):
     md = traj[-1].md
     mud_weight = 1290.
     gtf = 0.
-    r = sagcor(bha, md, traj, gtf, mud_weight, 0.)
+    r = sagcor(bha, md, traj, gtf, mud_weight)
 
     assert abs(r.sag - deg2rad(-0.15)) < deg2rad(.005)
 
@@ -28,7 +28,7 @@ def test_xcd(bha: BHA):
     md = traj[-1].md
     mud_weight = 1290.
     gtf = 0.
-    r = sagcor(bha, md, traj, gtf, mud_weight, 0.)
+    r = sagcor(bha, md, traj, gtf, mud_weight)
     sag1 = r.sag
     sag2 = x2sag(.75, r.opt, 19)
 
