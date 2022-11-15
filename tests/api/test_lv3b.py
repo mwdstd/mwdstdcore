@@ -20,7 +20,7 @@ def test_main(client: FlaskClient):
                 'dni_rigid': True,
                 'bha': {
                     'structure': [
-                        {'type': 'bit', 'od': 1, 'id': 0, 'weight': 0, 'length': 0, 'material': 'steel'}
+                        {'type': 'bit', 'od': 1, 'id': 0, 'weight': 10, 'length': 10, 'material': 'steel'}
                     ],
                     'blades': [],
                     'dni_to_bit': 0,

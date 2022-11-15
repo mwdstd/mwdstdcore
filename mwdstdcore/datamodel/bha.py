@@ -82,3 +82,7 @@ class BHA:
     @bend_angle.validator
     def dni_check(self, attr, val):
         pass
+
+    @property
+    def length(self) -> float:
+        return sum(el.length for el in self.structure)

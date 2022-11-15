@@ -5,7 +5,6 @@ from mwdstdcore.api.apierror import RequestDataError
 from mwdstdcore.errormods.codes import def_pattern
 from .interval import Interval
 from .ref import Reference
-from .slide import SlideInterval
 from .survey import Survey
 from .correction import Correction
 from .bha import BHA
@@ -21,20 +20,12 @@ class Run:
     edi: float
     dni_rigid: bool
     bha: BHA = None
-    slidesheet: List[SlideInterval] = None
-    # dni2bit: float = -100.
     casing_depth: float = -100.
     exti_interval: Interval = attr.ib(factory=Interval)
     mode: str = 'model'
     eterm_sigma: float = 1.
     min_inc_err: float = 0.
     min_az_err: float = 0.
-
-    # controlling flags
-    status_auto: bool = True
-    status_msa: bool = True
-    status_multi: bool = False
-    # status_recalc: bool = True #equivalent of correction is not None
 
     correction: Correction = None
     reference: List[Reference] = None
@@ -96,7 +87,7 @@ class Run:
     @property
     def time(self):
         if self.__time is None:
-            self.__time = np.array(list(map(lambda s: s.md, self.surveys)))  # TODO: FAX: add time to Survey class
+            self.__time = np.array(list(map(lambda s: s.md, self.surveys)))
         return self.__time
 
     __survey_status = None
@@ -107,14 +98,6 @@ class Run:
             self.__survey_status = np.array(list(map(lambda s: s.qc, self.correction.surveys)))
         return self.__survey_status
 
-    __axis_status = None
-
-    @property
-    def axis_status(self):
-        if self.__axis_status is None:
-            self.__axis_status = np.array(list(map(lambda s: s.fa, self.correction.surveys)))
-        return self.__axis_status
-
     @property
     def dni_cor(self):
         return self.correction.dni_cs.toarray()
@@ -122,22 +105,6 @@ class Run:
     @property
     def ref_cor(self):
         return self.correction.ref_cs.toarray()
-
-    @property
-    def faxis(self):
-        return max(map(lambda s: s.fa, self.correction.surveys))
-
-    @property
-    def fax_cor(self):
-        return np.array(list(self.correction.fax_cs.values()))
-
-    @property
-    def fax_ind(self):
-        return np.array(list(self.correction.fax_cs.keys()))
-
-    @property
-    def fax_cs(self):
-        return self.correction.fax_cs
 
     @property
     def correct_pattern(self):

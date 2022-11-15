@@ -16,11 +16,7 @@ class ManualCorrection:
     qa: QualityAssessment
     surveys: List[ManualCorrectedSurvey]
     stations: List[CorrectedStation] = attr.ib(factory=list)
-    stations_proj: Optional[List[Station]] = None
-    stations_unc: Optional[List[Station]] = None
-    msa_group: int = 0
     sag: Optional[List[float]] = None
-    sag_tag: Optional[str] = None
     stations_hd: Optional[List[TfStation]] = None
     deepest: Optional[StationPosition] = None
     plan_dev: Optional[StationPosition] = None
@@ -39,7 +35,6 @@ class ManualCorrection:
 class Correction:
     dni_cs: DnIParams
     ref_cs: RefParams
-    fax_cs: Dict[int, float]
     apr_unc: Dict[str, float]
     apst_unc: DnIParams
     ref_unc: RefParams
@@ -47,14 +42,8 @@ class Correction:
     qa: QualityAssessment
     surveys: List[CorrectedSurvey]
     stations: List[CorrectedStation] = attr.ib(factory=list)
-    stations_proj: Optional[List[Station]] = None
-    stations_unc: Optional[List[Station]] = None
-    msa_group: int = 1
-    edi: Tuple[float, float] = (0., 0.)
     sag: Optional[List[float]] = None
-    sag_tag: Optional[str] = None
     stations_hd: Optional[List[TfStation]] = None
-    depth_cs: Optional[List[float]] = None
     deepest: Optional[StationPosition] = None
     plan_dev: Optional[StationPosition] = None
 
@@ -69,10 +58,10 @@ class Correction:
 
 
 def set2cor(apr_unc, dni_xyz_cor, dni_cor, ref_cor, apst_vect, ref_cov_mat, inc_stat, inc_unc, az_stat, az_unc,
-            gbd_boundaries, survey_status, axis_status, validity, run):
+            gbd_boundaries, survey_status, validity, run):
     num = inc_stat.shape[0]
     surveys = CorrectedSurvey.listFromSets(run.surveys, run.reference, dni_xyz_cor, gbd_boundaries, inc_unc, az_unc,
-                                           inc_stat, az_stat, survey_status, axis_status)
+                                           inc_stat, az_stat, survey_status)
     raw_stations = [calc_full_station(s, dec=r.dec, grid=r.grid) for s, r in zip(run.surveys, run.reference)]
     stations = [
         calc_corrected_station(surveys[i], raw_stations[i], dec=run.reference[i].dec, grid=run.reference[i].grid) for i
@@ -80,7 +69,6 @@ def set2cor(apr_unc, dni_xyz_cor, dni_cor, ref_cor, apst_vect, ref_cov_mat, inc_
     return Correction(
         dni_cs=DnIParams.fromarray(dni_cor),
         ref_cs=RefParams.fromarray(ref_cor),
-        fax_cs={},
         apr_unc=apr_unc,
         apst_unc=DnIParams.fromarray(apst_vect),
         ref_unc=RefParams.fromarray(np.sqrt(np.diag(ref_cov_mat))),

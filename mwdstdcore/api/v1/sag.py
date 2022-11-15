@@ -1,8 +1,6 @@
-from typing import List, Optional
-import jsons
-import hashlib
-import numpy as np
-from math import radians, cos, sin, atan2
+from typing import Dict, List, Optional, Tuple
+from collections import OrderedDict
+from math import degrees, radians
 
 from mwdstdcore.datamodel import Station, BHA, Correction
 from mwdstdcore.datamodel.calc.station import calc_gtf
@@ -13,38 +11,25 @@ from ..logs import DebugTimer
 SAG_TOLERANCE = radians(2 * 0.225)
 
 
-def sag_basic(runs: List[Run2], corrections: List[Optional[Correction]], use_hd: bool = False):
+def sag_basic(runs: List[Run2], corrections: List[Optional[Correction]]):
     for ri, run in enumerate(runs):
         corr = corrections[ri]
         if corr is None:
             continue
 
-        # Get indices of STD surveys with good inc/az unc
-        idx = corr.get_std_inc_idx()
-        idx = sorted(idx, key=lambda i: corr.stations[i].md)
+        # Skip if already done
+        if run.correction == corr:
+            continue
 
-        if len(idx) > 1:
-            
-            # calculate trajectory for filtered surveys and reference
-            traj = [corr.stations[i] for i in idx]
-
-            sag_tag = hashlib.md5(jsons.dumps(traj).encode('utf-8')).hexdigest()
-            if run.correction is not None and run.correction.sag_tag == sag_tag:
-                corr.sag = run.correction.sag
-                corr.qa.sag_conv.value = run.correction.qa.sag_conv.value
-                corr.qa.sag_exp.value = run.correction.qa.sag_exp.value
-            else:
-                # calculate sag on filtered surveys depths
-                with DebugTimer(f"Sag{ri}: {{:0.2f}}"):
-                    sag_results = [run_sagcor(st, sgtf, run.bha, run.mud_weight, traj) for st, sgtf in
-                            [(st, calc_gtf(s)) for s, st in [(corr.surveys[i], corr.stations[i]) for i in idx]]]
-                corr.sag = [sag for sag, valid in sag_results]
-                corr.qa.sag_conv.value = all(valid for sag, valid in sag_results)
-                corr.qa.sag_exp.value = all(abs(sag) < SAG_TOLERANCE for sag, valid in sag_results)
-                # interpolate sag for bad surveys
-                if len(corr.sag) > 0:
-                    corr.sag = np.interp([s.md for s in corr.surveys], [corr.surveys[i].md for i in idx], corr.sag).tolist()
-            corr.sag_tag = sag_tag
+        if len(corr.stations) > 0:
+            # calculate sag
+            with DebugTimer(f"Sag{ri}: {{:0.2f}}"):
+                sag_results = [
+                    run_sagcor(st.inc, run.bha, run.mud_weight) for st in corr.stations
+                ]
+            corr.sag = [sag for sag, valid in sag_results]
+            corr.qa.sag_conv.value = all(valid for sag, valid in sag_results)
+            corr.qa.sag_exp.value = all(abs(sag) < SAG_TOLERANCE for sag, valid in sag_results)
 
             # apply sag correction to source trajectory
             for st, sag in zip(corr.stations, corr.sag):
@@ -52,30 +37,46 @@ def sag_basic(runs: List[Run2], corrections: List[Optional[Correction]], use_hd:
                 st.dinc -= sag
 
 
-# linear station extrapolation
-def extrapolate_station(md: float, st1: Station, st2: Station) -> Station:
-    dinc = st1.inc - st2.inc
-    cos_x = cos(st1.az) * cos(st2.az) + sin(st1.az) * sin(st2.az)
-    sin_x = cos(st2.az) * sin(st1.az) - sin(st2.az) * cos(st1.az)
-    daz = atan2(sin_x, cos_x)
-    rate = (md - st1.md) / (st1.md - st2.md)
-    return Station(
-        md=md, 
-        inc=st1.inc + dinc * rate, 
-        az=st1.az + daz * rate
-    )
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.cache = OrderedDict()
+        self.capacity = capacity
+    def get(self, key: Tuple[str, float]) -> Dict[float, Tuple[float, bool]]:
+        if key not in self.cache:
+            return None
+        else:
+            self.cache.move_to_end(key)
+            return self.cache[key]
+    def put(self, key: Tuple[str, float], value: int) -> None:
+        self.cache[key] = value
+        self.cache.move_to_end(key)
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last = False)
 
+bha_cache = LRUCache(10)
 
-def run_sagcor(station: Station, survey_gtf: float, bha: BHA, mud_weight:float, base_traj: List[Station]):
-    if station.inc < radians(5.):
+def get_cached_sag(inc: float, bha: BHA, mud_weight: float) -> Tuple[float, bool]:
+    table = bha_cache.get((repr(bha), mud_weight))
+    if table is None:
+        return None
+    return table.get(inc)
+
+def cache_sag(inc: float, bha: BHA, mud_weight: float, sag: float, valid: bool):
+    table = bha_cache.get((repr(bha), mud_weight))
+    if table is None:
+        table = {}
+        bha_cache.put((repr(bha), mud_weight), table)
+    table[inc] = (sag, valid)
+
+def run_sagcor(inc: float, bha: BHA, mud_weight: float):
+    if inc < radians(5.):
         return 0., True
-    bit_depth = station.md + bha.dni_to_bit
-    # traj = [st for st in base_traj if st.md <= bit_depth]
-    traj = [st for st in base_traj]
-    if len(traj) == 0:
-        return 0., True
-    # extrapolate trajectory to bit
-    if traj[-1].md < bit_depth and len(traj) > 1:
-        traj.append(extrapolate_station(bit_depth, traj[-1], traj[-2]))
-    res = sagcor(bha, bit_depth, traj, survey_gtf + bha.tf_correction, mud_weight)
+    inc = radians(round(degrees(inc)))
+    cached = get_cached_sag(inc, bha, mud_weight)
+    if cached is not None:
+        return cached
+    bit_depth = bha.dni_to_bit
+    traj = [Station(bit_depth - bha.length - 10, inc, 0), Station(bit_depth + 10, inc, 0.)]
+    res = sagcor(bha, bit_depth, traj, radians(90.), mud_weight)
+    cache_sag(inc, bha, mud_weight, res.sag, res.valid)
     return res.sag, res.valid

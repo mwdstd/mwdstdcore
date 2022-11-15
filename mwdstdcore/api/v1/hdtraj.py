@@ -24,7 +24,7 @@ def hdtraj(runs: List[Run3], corrections: List[Optional[Correction]], optimize_h
             # calculate interpolated trajectory
             if run.ci is not None and len(run.ci) > 2:
                 with DebugTimer(f"CIHD{ri}: {{:0.2f}}"):
-                    traj_hd, srv_freq_qc, ci_vrf_qc = cinc2traj(run.ci, traj, run.bha, run.slidesheet)
+                    traj_hd, srv_freq_qc, ci_vrf_qc = cinc2traj(run.ci, traj, run.bha)
                     corr.qa.srv_freq.value = srv_freq_qc
                     corr.qa.ci_vrf.value = ci_vrf_qc
                     md_cont_inc = [ci.md for ci in run.ci]
@@ -32,6 +32,4 @@ def hdtraj(runs: List[Run3], corrections: List[Optional[Correction]], optimize_h
                     corr.stations_hd = opt4hd(md_stations, md_cont_inc, traj_hd) if optimize_hd else traj_hd
                     for s in corr.stations_hd:
                         s.az = bound_az(s.az)
-            elif run.slidesheet is not None and len(run.slidesheet) > 0:
-                pass
 

@@ -7,7 +7,7 @@ from .core import api
 from ..utils import json_call
 from ..apierror import RequestMalformed
 
-from mwdstdcore.datamodel import DnIParams, Reference, Survey, Qc, QcBoundary, BHA, SlideInterval, RefParams
+from mwdstdcore.datamodel import DnIParams, Reference, Survey, Qc, QcBoundary, BHA, RefParams
 from mwdstdcore.datamodel.cor_survey import ManualCorrectedSurvey
 from mwdstdcore.datamodel.calc.station import calc_station, calc_corrected_station, calc_gbd
 from mwdstdcore.datamodel.ref import get_default_boundaries
@@ -25,7 +25,6 @@ class Params:
     sag: Optional[List[float]] = None
     geomag: str = None
     ref_cs: RefParams = None
-    slidesheet: Optional[List[SlideInterval]] = None
     bha: Optional[BHA] = None
 
 

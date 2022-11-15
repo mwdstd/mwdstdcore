@@ -7,8 +7,9 @@ from .core import api
 from ..utils import json_call
 from ..apierror import RequestMalformed
 
-from .models import Station, NorthType
+from .models import NorthType
 from .ref import head_reference, plan_reference
+from mwdstdcore.datamodel import Station
 from mwdstdcore.errormods.gmagmod import gmagmod, bggm
 
 

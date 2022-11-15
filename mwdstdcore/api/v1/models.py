@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 from enum import Enum
 from typing import List
 import attr
-from mwdstdcore.datamodel import BHA, Correction, ManualCorrection, Reference, SlideInterval, Station, Survey, CIStation, DnIParams
+from mwdstdcore.datamodel import BHA, Correction, ManualCorrection, Reference, Survey, CIStation, DnIParams
 
 
 @attr.s(auto_attribs=True, kw_only=True)
@@ -15,7 +15,6 @@ class SurveyRef(Survey):
 @attr.s(auto_attribs=True, kw_only=True)
 class QcBase:
     qc: int
-    fa: bool
 
 
 @attr.s(auto_attribs=True, kw_only=True)
@@ -49,7 +48,6 @@ class Interval:
 @attr.s(auto_attribs=True)
 class ManualCorrectionIn:
     dni_cs: DnIParams
-    sag_tag: str = ''
 
 
 @attr.s(auto_attribs=True, kw_only=True)
@@ -60,8 +58,6 @@ class Run0:
     casing_depth: float = attr.ib(default=-100., converter=attr.converters.default_if_none(-100.))
     dni_rigid: bool
     correction: Optional[Union[Correction, ManualCorrection, ManualCorrectionIn]]
-    status_multi: bool = False
-    status_auto: bool = True
     status_msa: bool = True
 
 
@@ -73,7 +69,6 @@ class Run2(Run0):
 
 @attr.s(auto_attribs=True, kw_only=True)
 class Run3(Run2):
-    slidesheet: List[SlideInterval] = attr.ib(factory=list)
     ci: Optional[List[CIStation]] = None
 
 

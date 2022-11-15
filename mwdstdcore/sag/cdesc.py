@@ -20,7 +20,7 @@ def coord_descent(xs, e, q, od, xl, xu, dz, bi, ba, eps):
     while sqrt(sdx) > eps and ni < mi:
         ni += 1
         sdx = 0.
-        for i in range(0, eln):
+        for i in range(0, eln - 1):
             if i == 0:
                 d0 = 0.
                 d1 = 0.
@@ -42,13 +42,6 @@ def coord_descent(xs, e, q, od, xl, xu, dz, bi, ba, eps):
                 e0 = e[i - 1]
                 e1 = e[i]
                 e2 = e[i + 1]
-            elif i == eln - 1:
-                d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2
-                d1 = 0.
-                d2 = 0.
-                e0 = e[i - 1]
-                e1 = e[i]
-                e2 = 0.
             else:
                 d0 = (x[i] + x[i - 2] - 2 * x[i - 1]) / dz ** 2 - (db if i == bi + 1 else 0.)
                 d1 = (x[i + 1] + x[i - 1] - 2 * x[i]) / dz ** 2 - (db if i == bi else 0.)

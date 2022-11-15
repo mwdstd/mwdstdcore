@@ -13,8 +13,6 @@ def qc(dni_xyz, ref, ref_cor=np.zeros(0), dni_mod='dni_std', ref_mod=bggm, num_o
     else:
         dni_mod = dni_std
     srv_num = dni_xyz.shape[0]
-    survey_status = np.zeros(srv_num)
-    axis_status = -np.ones(srv_num)
     correct_pattern = def_pattern
     # setup covariance matrix
     num = len(correct_pattern)

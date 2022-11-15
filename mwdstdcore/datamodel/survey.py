@@ -11,7 +11,6 @@ class Survey:
     bx: float
     by: float
     bz: float
-    # time: float = index  # TODO: FAX
     # temp: float = None  # TODO: Lv4?
     pre_qc: bool = True
 

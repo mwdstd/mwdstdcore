@@ -49,14 +49,14 @@ def iat2xyz(inc: ndarray, az: ndarray, tf: ndarray, g: ndarray, b: ndarray, d: n
     return xyz
 
 
-def gbd(dni_xyz: ndarray) -> [ndarray, ndarray, ndarray]:
+def gbd(dni_xyz: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
     g = sqrt(dni_xyz[:, 0] ** 2 + dni_xyz[:, 1] ** 2 + dni_xyz[:, 2] ** 2)
     b = sqrt(dni_xyz[:, 3] ** 2 + dni_xyz[:, 4] ** 2 + dni_xyz[:, 5] ** 2)
     d = arcsin((dni_xyz[:, 0] * dni_xyz[:, 3] + dni_xyz[:, 1] * dni_xyz[:, 4] + dni_xyz[:, 2] * dni_xyz[:, 5]) / g / b)
     return [g, b, d]
 
 
-def dgbd(dni_xyz: ndarray, ref: ndarray) -> [ndarray, ndarray, ndarray]:
+def dgbd(dni_xyz: ndarray, ref: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
     [g, b, d] = gbd(dni_xyz)
     dg = ref[:, 0] - g
     db = ref[:, 1] - b
@@ -64,8 +64,7 @@ def dgbd(dni_xyz: ndarray, ref: ndarray) -> [ndarray, ndarray, ndarray]:
     return [dg, db, dd]
 
 
-def dni_correct(dni_xyz: ndarray, dni_cor: ndarray, faxis: int = -1, failed_axis: ndarray = np.zeros(0),
-                failed_index: ndarray = np.zeros(0)) -> ndarray:
+def dni_correct(dni_xyz: ndarray, dni_cor: ndarray) -> ndarray:
     dni_cor_ = dni_cor.copy()
     dni_xyz_ = dni_xyz.copy()
 
@@ -93,9 +92,6 @@ def dni_correct(dni_xyz: ndarray, dni_cor: ndarray, faxis: int = -1, failed_axis
     dni_xyz_[:, 4] = dni_xyz_[:, 4] / msy - mby
     dni_xyz_[:, 5] = dni_xyz_[:, 5] / msz - mbz
 
-    # failed axis correction if applicable
-    if faxis != -1:
-        dni_xyz_[failed_index, faxis] = failed_axis
     dni_xyz_cor = dni_xyz_.copy()
 
     # misalignment correction
@@ -106,7 +102,4 @@ def dni_correct(dni_xyz: ndarray, dni_cor: ndarray, faxis: int = -1, failed_axis
     dni_xyz_cor[:, 4] = dni_xyz_[:, 4] + mxy * dni_xyz_[:, 3] - myz * dni_xyz_[:, 5]
     dni_xyz_cor[:, 5] = dni_xyz_[:, 5] + mxz * dni_xyz_[:, 3] + myz * dni_xyz_[:, 4]
 
-    # re-write failed axis
-    if faxis != -1:
-        dni_xyz_cor[failed_index, faxis] = failed_axis
     return dni_xyz_cor

@@ -19,10 +19,10 @@ def autocor(run: Run, refmod_name: str = 'bggm'):
     if len(run.surveys) == 0:
         return None
     [apr_unc, dni_xyz_cor, dni_cor, ref_cor, apst_vect, ref_cov_mat, inc_st, inc_unc, az_st, az_unc, gbd_boundaries,
-     survey_status, axis_status, validity] = autocore(run, refmod_name)
+     survey_status, validity] = autocore(run, refmod_name)
 
     return set2cor(apr_unc, dni_xyz_cor, dni_cor, ref_cor, apst_vect, ref_cov_mat, inc_st, inc_unc, az_st, az_unc,
-                   gbd_boundaries, survey_status, axis_status, validity, run)
+                   gbd_boundaries, survey_status, validity, run)
 
 
 # automatic analysis of survey set for different issues
@@ -49,7 +49,7 @@ def autocore(run: Run, refmod_name: str):
     validity = validation(run.pre_qc, run.mag_qc, apr_unc, dni_cor, ref_cor, ref_mod, survey_status, inc_stat, az_stat)
 
     return [apr_unc, dni_xyz_cor, dni_cor, ref_cor, apst_vect, ref_cov_mat, inc_stat, inc_unc,
-            az_stat, az_unc, gbd_boundaries, survey_status, -np.ones_like(survey_status), validity]
+            az_stat, az_unc, gbd_boundaries, survey_status, validity]
 
 
 def remap(md: np.ndarray, gbd_norm: np.ndarray, casing_depth=-100., exti_int=(-100., -100.), num_of_sigma=2.):

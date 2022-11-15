@@ -8,7 +8,6 @@ from .qa import QualityAssessment
 from .ref import RefParams, Reference
 from .qc_bond import Qc, QcBoundary
 from .run import Run
-from .slide import SlideInterval, SlideMode, TfMode
 from .station import CIStation, Station, FullStation, CorrectedStation, TfStation, Position, StationPosition
 from .survey import Survey
 from .well import Well, WellShort

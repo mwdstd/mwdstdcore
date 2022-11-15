@@ -51,7 +51,7 @@ def test_autocor(base_traj: List[TfStation]):
             mask[i] = 1.
 
     run = simulate_run(base_traj, ref1, dni_err_dsi, noise_default_acc, noise_default_mag)
-    _, _, dsi_cor, _, _, _, _, _, _, _, _, _, _, _ = autocore(run, refmod_name='bggm')
+    _, _, dsi_cor, _, _, _, _, _, _, _, _, _, _ = autocore(run, refmod_name='bggm')
 
     delta = mask * (dni_cor - dsi_cor) / unc
     assert np.prod(np.abs(delta) < 3)

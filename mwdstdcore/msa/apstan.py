@@ -7,7 +7,7 @@ from mwdstdcore.core.analysis.jacobian import jcbn4run
 from mwdstdcore.core.analysis.covmat import covmat_run
 from mwdstdcore.core.analysis.emanalysis import em_analysis
 from mwdstdcore.core.wfunc import wfunc
-from mwdstdcore.errormods.codes import faxis, def_pattern
+from mwdstdcore.errormods.codes import def_pattern
 from mwdstdcore.core.common.srvmath import iat, gbd
 
 
@@ -23,7 +23,7 @@ def run_apst(dni_xyz: ndarray, apr_unc: Dict[str, float], dni_err_mod: str, ref_
     # actual errors calculation
     apst_cov_mat = covmat_apst(dni_xyz, apr_unc, ref_mod)
 
-    [_, jcbn_inc, jcbn_az] = jdia(dni_xyz, -np.ones(num), def_pattern)
+    [_, jcbn_inc, jcbn_az] = jdia(dni_xyz, def_pattern)
     cov_mat_inc = jcbn_inc @ apst_cov_mat[:-3, :-3] @ jcbn_inc.T
     cov_mat_az = jcbn_az @ apst_cov_mat[:-3, :-3] @ jcbn_az.T
 
@@ -54,22 +54,15 @@ def covmat_apst(dni_xyz: ndarray, apr_unc: Dict[str, float], refmod: Dict[str, f
 
 
 # jacobians for depth, inclination and azimuth
-def jdia(dni_xyz: ndarray, axis_status: ndarray, correct_pattern: List[str]):
+def jdia(dni_xyz: ndarray, correct_pattern: List[str]):
     [inc, az_m, tf] = iat(dni_xyz)
     [g, b, d] = gbd(dni_xyz)
 
-    fail_indexes = np.argwhere(axis_status != -1)[:, 0]
-    failed_survey_num = fail_indexes.shape[0]
-    if failed_survey_num == 0:
-        fail_axis_code = 'none'
-    else:
-        fail_axis_code = faxis[axis_status[fail_indexes[0]]]
-
     basic_pattern = correct_pattern
     basic_error_num = len(basic_pattern)
-    total_error_num = basic_error_num + failed_survey_num
+    total_error_num = basic_error_num
     survey_num = dni_xyz.shape[0]
-    full_pattern = correct_pattern + failed_survey_num * [fail_axis_code]
+    full_pattern = correct_pattern
     jcbn_md = np.zeros((survey_num, total_error_num))
     jcbn_inc = np.zeros((survey_num, total_error_num))
     jcbn_az = np.zeros((survey_num, total_error_num))
@@ -77,38 +70,10 @@ def jdia(dni_xyz: ndarray, axis_status: ndarray, correct_pattern: List[str]):
     fail_survey_index = 0
     while i < survey_num:
         j = 0
-        fax_stat = axis_status[i]
-        fail_axis = faxis[fax_stat]
         for error_code in full_pattern:
-            if fax_stat != -1:
-                if j >= basic_error_num and j - basic_error_num < fail_survey_index:
-                    j += 1
-                    continue
-                elif j >= basic_error_num and j - basic_error_num > fail_survey_index:
-                    fail_survey_index += 1
-                    break
-            else:
-                if j >= basic_error_num:
-                    break
+            if j >= basic_error_num:
+                break
             dpdr = wfunc(error_code, inc=inc[i], az=az_m[i], tf=tf[i], g=g[i], b=b[i], d=d[i])
-            if fail_axis == 'AFX':
-                if error_code == 'ABX' or error_code == 'ASX':
-                    dpdr *= 0.
-            elif fail_axis == 'AFY':
-                if error_code == 'ABY' or error_code == 'ASY':
-                    dpdr *= 0.
-            elif fail_axis == 'AFZ':
-                if error_code == 'ABZ' or error_code == 'ASZ':
-                    dpdr *= 0.
-            elif fail_axis == 'MFX':
-                if error_code == 'MBX' or error_code == 'MSX':
-                    dpdr *= 0.
-            elif fail_axis == 'MFY':
-                if error_code == 'MBY' or error_code == 'MSY':
-                    dpdr *= 0.
-            elif fail_axis == 'MFY':
-                if error_code == 'MBZ' or error_code == 'MSZ':
-                    dpdr *= 0.
             jcbn_md[i, j] = dpdr[0]
             jcbn_inc[i, j] = dpdr[1]
             jcbn_az[i, j] = dpdr[2]

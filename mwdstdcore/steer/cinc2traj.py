@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 import numpy as np
 from numpy import pi
-from mwdstdcore.datamodel import BHA, SlideInterval, TfStation, CIStation
+from mwdstdcore.datamodel import BHA, TfStation, CIStation
 from mwdstdcore.core.common.mincurv import mincurv_int
 
 
@@ -16,8 +16,8 @@ INT_STEP = 3.  # m
 
 
 # calculate HD surveys from stationary and continuous inclination surveys
-def cinc2traj(cinc: List[CIStation], stations: List[TfStation], bha: Optional[BHA] = None,
-              steering: Optional[List[SlideInterval]] = None) -> Tuple[List[TfStation], bool, bool]:
+def cinc2traj(cinc: List[CIStation], stations: List[TfStation], 
+        bha: Optional[BHA] = None) -> Tuple[List[TfStation], bool, bool]:
     # find DLS capacity
     # dls = dlsest(stations, bha, steering)
     dls = 7. * np.pi / 180 / 30
