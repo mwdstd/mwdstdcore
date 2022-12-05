@@ -29,7 +29,8 @@ def sagcor(bha: BHA, md_bit: float, trajectory: List[Station], steer_gtf: float,
     else:
         bh_design = None
 
-    inc_dni = trajinc(bha.dni_to_bit, md_bit, traj)
+    inc_dni = (trajectory[0].inc + trajectory[-1].inc) / 2
+
     if inc_dni < 10. * pi / 180:
         delta = [1.5]
         eps = [1.e-7]
@@ -57,19 +58,15 @@ def optimize_x(bha: BHA, gtf: float, mud_weight: float, md_bit: float, traj: nda
     dz = delta[0]
     [ei, bha_od, bha_id, linear_weight, bend_ind] = bha2input(bha, dz)
     z_cur = np.cumsum(dz * np.ones_like(ei)) - dz
-    inc_dni = trajinc(bha.dni_to_bit, md_bit, traj)
+
+    [x_mid, inc_dni, inc_avg] = traj2coord(z_cur, md_bit, traj)
     q = linear_weight * (1 - mud_weight / ro_steel) * np.sin(inc_dni)
 
-    if bh_design is None:
-        radius = .5 * (bha_od[0] * np.ones_like(ei) + borehole_enlargement)
-        x_low = -radius
-        x_top = radius
-    else:
-        bh_size = bh2size(md_bit, z_cur, bh_design)
-        x_low = -(bh_size + borehole_enlargement) / 2
-        x_top = (bh_size + borehole_enlargement) / 2
+    radius = .5 * (np.max(bha_od) * np.ones_like(ei) + borehole_enlargement)
+    x_low = x_mid - radius
+    x_top = x_mid + radius
 
-    x_opt = (x_low + bha_od / 2.) if inc_dni > 2.5 * pi / 180 else (x_low + x_top) / 2
+    x_opt = (x_low + bha_od / 2.) if inc_avg > 2.5 * pi / 180 else (x_low + x_top) / 2
     if not (x0 is None):
         x_opt = x0.copy()
 
@@ -79,12 +76,14 @@ def optimize_x(bha: BHA, gtf: float, mud_weight: float, md_bit: float, traj: nda
     return [z_cur, x_opt, x_low, x_top, bha_od, bha_id, bool(io)]
 
 
-def trajinc(md_dni, md_bit, traj):
+def traj2coord(z, md_bit, traj):
     md = np.flip(traj[:, 0])
     inc = np.flip(traj[:, 1])
-    md = -(md - md_bit)
-    inc_dni = np.interp(md_dni, md, inc)
-    return inc_dni
+    md = -(md - md_bit)  # revert md to z coordinate
+    inc_hd = np.interp(z, md, inc)
+    inc_avg = np.mean(inc_hd)
+    x_hd = (z[1] - z[0]) * (np.cumsum(np.cos(inc_hd)) - np.cumsum(np.cos(inc_avg)))
+    return [x_hd, inc_hd, inc_avg]
 
 
 def bh2size(md_bit: float, z: ndarray, bh_design: ndarray):
