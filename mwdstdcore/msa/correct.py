@@ -10,7 +10,7 @@ from .apstan import covmat_apst
 def correct(dni_xyz: ndarray, ref: ndarray, survey_status: ndarray, refmod, apr_unc) ->\
         Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-    [dni_cor, _] = de_correct(dni_xyz, ref, survey_status, apr_unc, refmod)
+    [dni_cor, _] = de_correct(dni_xyz, ref, survey_status, apr_unc, refmod=refmod)
     dsi_cor = dni_cor[:15].flatten()
     ref_cor = dni_cor[-3:].flatten()
 
