@@ -25,7 +25,7 @@ def msa_basic(runs: List[Run], geomag: str):
                 corr = autocor(
                     rs.Run(
                         surveys=run.surveys, 
-                        dni_rigid=run.dni_rigid, 
+                        dni_rigid=True,
                         edi=0., 
                         reference=run.reference, 
                         exti_interval=getitem(run.interference_intervals, 0, Interval()),

@@ -32,7 +32,7 @@ def autocore(run: Run, refmod_name: str):
 
     # filtering stage
     # MSA setup
-    apr_unc = covan(run.dni_xyz)
+    apr_unc = covan(run.dni_xyz, rigid_dni=run.dni_rigid)
 
     # sole run correction
     [dni_cor, ref_cor, apst_cov_mat] = correct(run.dni_xyz, run.ref, survey_status, ref_mod, apr_unc)

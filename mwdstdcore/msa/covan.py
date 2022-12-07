@@ -6,7 +6,7 @@ from mwdstdcore.core.common.srvmath import iat
 
 
 # simplified MSA setup of full analysis of apriori covariance matrix for performance maximization
-def covan(dni_xyz: ndarray):
+def covan(dni_xyz: ndarray, rigid_dni: bool = True):
 
     apriori_unc = dni_std.copy()
     apriori_unc['MBZ'] = unknown['MBZ']
@@ -20,5 +20,10 @@ def covan(dni_xyz: ndarray):
         if np.max(dtf) <= 100 * np.pi / 180:
             apriori_unc['MBX'] = unknown['MBX']
             apriori_unc['MBY'] = unknown['MBY']
+
+    if not rigid_dni:
+        apriori_unc['MXY'] = unknown['MXY']
+        apriori_unc['MXZ'] = unknown['MXZ']
+        apriori_unc['MYZ'] = unknown['MYZ']
 
     return apriori_unc
