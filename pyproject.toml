@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "mwdstdcore"
-version = "0.6.0"
+version = "0.7.0"
 license = "AGPL-3.0-or-later"
 description = "Core project for basic measurement-while-drilling corrections"
 authors = ["MWD STD Inc. <info@mwdstd.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 Flask = "^2.1.2"
 jsons = "^1.6.3"
 attrs = "^21.4.0"
