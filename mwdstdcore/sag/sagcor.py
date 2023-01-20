@@ -40,8 +40,8 @@ def sagcor(bha: BHA, md_bit: float, trajectory: List[Station], steer_gtf: float,
 
     [z_cur, x_opt, x_low, x_top, bha_od, bha_id, valid] = optimize_x(bha, steer_gtf, mud_weight, md_bit, traj, delta,
                                                                      eps, bh_design=bh_design)
-    sag = x2sag(delta[-1], x_opt, bha.dni_to_bit)
     x_mid = (x_low + x_top) / 2
+    sag = x2sag(delta[-1], x_opt - x_mid, bha.dni_to_bit)
     return SagResult(sag=sag, grid=z_cur, opt=x_opt, low=x_low, top=x_top, od=bha_od, id=bha_id, mid=x_mid, valid=valid)
 
 

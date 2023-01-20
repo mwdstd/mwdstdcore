@@ -30,7 +30,7 @@ def test_xcd(bha: BHA):
     gtf = 0.
     r = sagcor(bha, md, traj, gtf, mud_weight)
     sag1 = r.sag
-    sag2 = x2sag(.75, r.opt, 19)
+    sag2 = x2sag(.75, r.opt - r.mid, 19)
 
     diff = abs(sag1 - sag2)
 
